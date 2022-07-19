@@ -15,7 +15,7 @@ const getMediaByTitle = (endpoint: string) => {
       res.json(response.data);
     } catch (e) {
       let errorMessage;
-      e instanceof Error ? (errorMessage = e.message) : "Post request failed";
+      e instanceof Error ? (errorMessage = e.message) : "GET request failed";
 
       return next(Error(errorMessage));
     }
