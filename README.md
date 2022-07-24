@@ -12,22 +12,23 @@ Every time
 
 The microservice will now be accessible at http://localhost:3000 by default.
 
-### Requesting/Receiving Data
+## Requesting/Receiving Data
 
-This microservice leverages the Jikan API to return data about a user-supplied anime/manga. Queries are made with the query string `?title=<string>`.
+This microservice leverages the Jikan API to return data about a user-supplied anime/manga. Queries are made with the query string `?title=<string>`. Data is received as JSON objects with HTTP status code 200 for successful responses. Failed requests will return HTTP codes 400/404.
 
-**Endpoints**
+### Endpoints
 
-`/anime `
+`/anime`
+
 `/manga`
 
-**Example Request** (JavaScript Fetch API)
+### Example Request (JavaScript Fetch API)
 
     fetch('http://localhost:3000/anime?title=shingeki-no-kyojin)
       .then(response => response.json())
       .then(data => console.log(data));
 
-**Example Response**:
+### Example Response:
 
     data:
     [
@@ -45,12 +46,27 @@ This microservice leverages the Jikan API to return data about a user-supplied a
 
 ```mermaid
 sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
+Client->>Microservice: Client makes GET request to endpoint
+Note over Client: /anime
+Note over Client: /manga
+Note over Client: query param: title
 
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
+Microservice->> Jikan API: Microservice requests external Jikan API
+Note over Microservice: query param: q
+
+alt  Success
+Jikan API->>Microservice: Request succeeded
+Note left of Jikan API: 200 OK
+else Error
+Jikan API->>Microservice: Request failed
+Note left of Jikan API:  400 Bad request <br> 404 Resource Not Found <br> 405 Method Not Allowed <br> 429 Too Many Requests <br> 500 Internal Server Error <br> 503 Service Unavailable
+end
+alt  Success
+
+Microservice ->> Client: Request succeeded: 200
+Note left of Microservice: 200 OK
+else Error
+Microservice->>Client: Request failed
+Note left of Microservice:  400 Bad Request <br> 404 Resource Not Found
+end
 ```
