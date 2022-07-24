@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 import anime from "./routes/anime";
 import manga from "./routes/manga";
+import HTTPError from "./utils/error";
 
 app.use(cors());
 app.use(express.json());
@@ -30,9 +31,9 @@ app.get("/manga", (_req: Request, res: Response) => {
 });
 
 app.all("*", (_req: Request, _res: Response, next: NextFunction) => {
-  next(Error("resource not found"));
+  next(new HTTPError("Resource not found", 404));
 });
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  res.send(err.message);
+app.use((err: HTTPError, _req: Request, res: Response, _next: NextFunction) => {
+  res.status(err.status).json({ error: err.message, status: err.status });
 });

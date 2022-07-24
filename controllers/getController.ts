@@ -1,23 +1,27 @@
 import axios, { AxiosResponse } from "axios";
 import { NextFunction, Request, Response } from "express";
+import HTTPError from "../utils/error";
 
 const getMediaByTitle = (endpoint: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { title } = req.query;
     if (typeof title !== "string" || !title) {
-      return next(Error("Query parameter 'title' must be of type string."));
+      return next(
+        new HTTPError("Query parameter 'title' must be of type string.")
+      );
     }
 
     try {
       const response: AxiosResponse = await axios.get(`${endpoint}?q=${title}`);
-      if (response.status !== 200) throw Error("Jikan API GET Request failed");
+      if (response.status !== 200)
+        throw new HTTPError("Jikan API GET Request failed");
 
       res.json(response.data);
     } catch (e) {
-      let errorMessage;
-      e instanceof Error ? (errorMessage = e.message) : "GET request failed";
+      let errorMessage = "GET request failed";
+      if (e instanceof Error) errorMessage = e.message;
 
-      return next(Error(errorMessage));
+      return next(new HTTPError(errorMessage));
     }
   };
 };
